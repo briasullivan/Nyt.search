@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -69,14 +68,14 @@ public class SearchActivity extends AppCompatActivity {
         rvResults.setLayoutManager(gridLayoutManager);
         rvResults.setAdapter(articleAdapter);
         rvResults.addItemDecoration(new SpacesItemDecoration(16));
-/*        rvResults.addOnScrollListener(new EndlessRecyclerViewScrollListener(gridLayoutManager) {
+        rvResults.addOnScrollListener(new EndlessRecyclerViewScrollListener(gridLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
                 if(curQuery != null) {
                     fetchArticles(curQuery, page);
                 }
             }
-        });*/
+        });
     }
 
     @Override
@@ -190,10 +189,13 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<NewYorkTimesResponse> call, Response<NewYorkTimesResponse> response) {
                 NewYorkTimesResponse nytResponse = response.body();
-                Log.d("DEBUG", nytResponse.toString());
-                List<Article> newArticles = Article.fromDocList(nytResponse.getResponse().getDocs());
-                articles.addAll(newArticles);
-                articleAdapter.notifyItemRangeInserted(0, newArticles.size());
+                if (nytResponse != null) {
+                    List<Article> newArticles = Article.fromDocList(nytResponse.getResponse().getDocs());
+                    int cursize = articles.size();
+                    articles.addAll(newArticles);
+                    articleAdapter.notifyItemRangeInserted(cursize, newArticles.size());
+                }
+
             }
 
             @Override
@@ -209,7 +211,7 @@ public class SearchActivity extends AppCompatActivity {
             String beginDateResult = data.getExtras().getString("beginDate");
             int sortResult = data.getExtras().getInt("sortType");
             String newsDeskResult = data.getExtras().getString("newsDeskValues");
-            
+
             filterByBeginDate = (beginDateResult != null);
             beginDate = beginDateResult;
             sortType = (sortResult == 0) ? SORT_TYPE_NEWEST : SORT_TYPE_OLDEST;
