@@ -1,6 +1,14 @@
 package com.codepath.nytsearch;
 
+import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,7 +63,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Article article = articles.get(position);
+        final Article article = articles.get(position);
 
         TextView tvHeadline = holder.headline;
         TextView tvSnippet = holder.snippet;
@@ -80,7 +88,20 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                builder.setToolbarColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
+                Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_action_share);
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, article.getWebUrl());
+                int requestCode = 100;
+                PendingIntent pendingIntent = PendingIntent.getActivity(getContext(),
+                        requestCode,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+                builder.setActionButton(bitmap, "Share Article", pendingIntent, true);
+                CustomTabsIntent customTabsIntent = builder.build();
+                customTabsIntent.launchUrl((Activity)getContext(), Uri.parse(article.getWebUrl()));
             }
         });
     }
