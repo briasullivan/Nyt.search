@@ -76,19 +76,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/news_desk_art"
-                android:id="@+id/checkBox" />
+                android:id="@+id/cbArt"
+                android:checked="false" />
 
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/news_desk_blogs"
-                android:id="@+id/checkBox2" />
+                android:id="@+id/cbBlogs"
+                android:checked="false" />
 
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/news_desk_education"
-                android:id="@+id/checkBox3" />
+                android:id="@+id/cbEducation"
+                android:checked="false" />
         </LinearLayout>
 
     </RelativeLayout>
@@ -98,6 +101,7 @@
         android:layout_height="wrap_content"
         android:text="@string/apply_filters"
         android:id="@+id/button"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:onClick="applyFilters" />
 
 </LinearLayout>

@@ -32,8 +32,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SearchActivity extends AppCompatActivity {
 
+    public static final int REQUEST_CODE = 20;
     private static final String URL = "https://api.nytimes.com/";
     private static final String API_KEY = "14c035ebdb164b918ff7e28339fa8570";
+    private static final String SORT_TYPE_NEWEST = "newest";
+    private static final String SORT_TYPE_OLDEST = "oldest";
+    private static final String NEWS_DESK_PREFIX = "news_desk:(";
+    private static final String NEWS_DESK_SUFFIX = ")";
 
     RecyclerView rvResults;
 
@@ -41,6 +46,11 @@ public class SearchActivity extends AppCompatActivity {
     ArticleAdapter articleAdapter;
     int curPage = 0;
     String curQuery = null;
+    String sortType = SORT_TYPE_NEWEST;
+    String beginDate;
+    boolean filterByBeginDate = false;
+    String newsDeskQuery;
+    boolean filterByNewsDeskValues = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,13 +88,8 @@ public class SearchActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                curPage = 0;
-                curQuery = query;
-                int curSize = articleAdapter.getItemCount();
-                articles.clear();
-                articleAdapter.notifyItemRangeRemoved(0, curSize);
-                fetchArticles(query, 0);
                 searchView.clearFocus();
+                prepareQueryAndRequest(query);
                 return true;
             }
 
@@ -93,7 +98,18 @@ public class SearchActivity extends AppCompatActivity {
                 return false;
             }
         });
-            return true;
+        return true;
+    }
+
+    private void prepareQueryAndRequest(String query) {
+        if (query != null) {
+            curPage = 0;
+            curQuery = query;
+            int curSize = articleAdapter.getItemCount();
+            articles.clear();
+            articleAdapter.notifyItemRangeRemoved(0, curSize);
+            fetchArticles(query, 0);
+        }
     }
 
     @Override
@@ -106,7 +122,15 @@ public class SearchActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_filter) {
             Intent i = new Intent(this, FilterSettingsActivity.class);
-            startActivity(i);
+
+            if (filterByBeginDate && beginDate != null) {
+                i.putExtra("beginDate", beginDate);
+            }
+            if (filterByNewsDeskValues && newsDeskQuery != null) {
+                i.putExtra("newsDeskValues", newsDeskQuery);
+            }
+            i.putExtra("sortType", (sortType == SORT_TYPE_NEWEST) ? 0 : 1);
+            startActivityForResult(i, REQUEST_CODE);
             return true;
         }
 
@@ -143,7 +167,25 @@ public class SearchActivity extends AppCompatActivity {
                 .build();
 
         NewYorkTimesService apiService = retrofit.create(NewYorkTimesService.class);
-        Call<NewYorkTimesResponse> call = apiService.listArticles(query, page);
+        Call<NewYorkTimesResponse> call;
+        if (filterByBeginDate && filterByNewsDeskValues) {
+            call = apiService.listArticlesWithFilterQueryAndBeginDate(
+                    query,
+                    NEWS_DESK_PREFIX + newsDeskQuery + NEWS_DESK_SUFFIX,
+                    page,
+                    sortType,
+                    beginDate);
+        } else if (filterByNewsDeskValues) {
+            call = apiService.listArticlesWithFilterQuery(
+                    query,
+                    NEWS_DESK_PREFIX + newsDeskQuery + NEWS_DESK_SUFFIX,
+                    page,
+                    sortType);
+        } else if (filterByBeginDate) {
+            call = apiService.listArticlesWithBeginDate(query, page, sortType, beginDate);
+        } else {
+            call = apiService.listArticles(query, page, sortType);
+        }
         call.enqueue(new Callback<NewYorkTimesResponse>() {
             @Override
             public void onResponse(Call<NewYorkTimesResponse> call, Response<NewYorkTimesResponse> response) {
@@ -160,4 +202,21 @@ public class SearchActivity extends AppCompatActivity {
             }
         });
       }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
+            String beginDateResult = data.getExtras().getString("beginDate");
+            int sortResult = data.getExtras().getInt("sortType");
+            String newsDeskResult = data.getExtras().getString("newsDeskValues");
+            
+            filterByBeginDate = (beginDateResult != null);
+            beginDate = beginDateResult;
+            sortType = (sortResult == 0) ? SORT_TYPE_NEWEST : SORT_TYPE_OLDEST;
+            filterByNewsDeskValues = (newsDeskResult != null);
+            newsDeskQuery = newsDeskResult;
+
+            prepareQueryAndRequest(curQuery);
+        }
+    }
 }
