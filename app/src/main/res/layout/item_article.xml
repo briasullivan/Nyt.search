@@ -1,19 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/grid_item_round_corner"
+    android:padding="10dp"
+    android:elevation="1dp">
 
-    <ImageView
+    <com.codepath.nytsearch.DynamicHeightImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/ivThumbnail"
+        tools:src="@drawable/article_placeholder"
+        android:scaleType="centerCrop"
         />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/tvHeadline"
-        tools:text="Firefighters brace for another day of intense heat, winds"/>
+        tools:text="Firefighters brace for another day of intense heat, winds"
+        android:gravity="left"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvSnippet"
+        tools:text="Information about the headline/"
+        android:gravity="left"
+        android:visibility="gone"/>
 
 </LinearLayout>
