@@ -5,13 +5,15 @@
     android:layout_height="wrap_content"
     android:background="@drawable/grid_item_round_corner"
     android:padding="10dp"
-    android:elevation="1dp">
+    android:elevation="1dp"
+    android:clickable="true"
+    android:focusable="true">
 
     <com.codepath.nytsearch.DynamicHeightImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/ivThumbnail"
-        tools:src="@drawable/article_placeholder"
+        tools:src="@drawable/newspaper"
         android:scaleType="centerCrop"
         />
 
@@ -20,7 +22,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/tvHeadline"
         tools:text="Firefighters brace for another day of intense heat, winds"
-        android:gravity="left"/>
+        android:gravity="left"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -29,5 +32,12 @@
         tools:text="Information about the headline/"
         android:gravity="left"
         android:visibility="gone"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Caption"
+        android:text="Small Text"
+        android:id="@+id/tvNewsDesk" />
 
 </LinearLayout>

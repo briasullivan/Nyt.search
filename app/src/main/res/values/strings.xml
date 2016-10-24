@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Nyt.search</string>
     <string name="action_settings">Settings</string>
+    <string name="connection_error">Not connected to the internet</string>
     <string name="hint">Enter search query</string>
     <string name="search">Search</string>
     <string name="filter">Filter</string>
@@ -11,6 +12,8 @@
     <string name="label_begin_date">Begin Date:</string>
     <string name="label_sort_order">Sort Order:</string>
     <string name="apply_filters">Apply Filters</string>
+    <string name="sports">Sports</string>
+    <string name="fashion_and_style"><![CDATA[Fashion & Style]]></string>
     <string-array name="sort_array">
         <item>Newest to oldest</item>
         <item>Oldest to newest</item>

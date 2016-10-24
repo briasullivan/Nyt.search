@@ -29,6 +29,9 @@ public class Article {
     public String getSnippet() {
         return snippet;
     }
+    public String getNewsDesk() {
+        return newsDesk;
+    }
 
     public int getHeight() {
         return height;
@@ -42,6 +45,7 @@ public class Article {
     String headline;
     String thumbNail;
     String snippet;
+    String newsDesk;
     int height;
     int width;
 
@@ -63,6 +67,7 @@ public class Article {
             this.thumbNail = "https://www.nytimes.com/" + doc.getMultimedia().get(imagePosition).getUrl();
             this.height = doc.getMultimedia().get(imagePosition).getHeight();
             this.width = doc.getMultimedia().get(imagePosition).getWidth();
+            this.newsDesk = doc.getNews_desk();
         }
     }
 

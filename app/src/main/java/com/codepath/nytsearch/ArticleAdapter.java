@@ -28,6 +28,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView headline;
         public TextView snippet;
+        public TextView newsdesk;
         public DynamicHeightImageView thumbnail;
 
         public ViewHolder(View itemView) {
@@ -35,6 +36,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
             headline = (TextView) itemView.findViewById(R.id.tvHeadline);
             thumbnail = (DynamicHeightImageView) itemView.findViewById(R.id.ivThumbnail);
             snippet = (TextView) itemView.findViewById(R.id.tvSnippet);
+            newsdesk = (TextView) itemView.findViewById(R.id.tvNewsDesk);
         }
     }
 
@@ -67,9 +69,11 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
 
         TextView tvHeadline = holder.headline;
         TextView tvSnippet = holder.snippet;
+        TextView tvNewsDesk = holder.newsdesk;
 
         String headline = article.getHeadline();
         tvHeadline.setText((headline != null) ? headline : "Headline");
+        tvNewsDesk.setText(article.getNewsDesk());
 
         DynamicHeightImageView imageView = holder.thumbnail;
 

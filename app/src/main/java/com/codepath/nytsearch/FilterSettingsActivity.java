@@ -17,6 +17,8 @@ public class FilterSettingsActivity extends AppCompatActivity {
     private CheckBox artCheckbox;
     private CheckBox blogsCheckbox;
     private CheckBox educationCheckbox;
+    private CheckBox fashionCheckbox;
+    private CheckBox sportsCheckbox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +33,8 @@ public class FilterSettingsActivity extends AppCompatActivity {
         artCheckbox = (CheckBox) findViewById(R.id.cbArt);
         blogsCheckbox = (CheckBox) findViewById(R.id.cbBlogs);
         educationCheckbox = (CheckBox) findViewById(R.id.cbEducation);
+        fashionCheckbox = (CheckBox) findViewById(R.id.cbFashion);
+        sportsCheckbox = (CheckBox) findViewById(R.id.cbSports);
 
         ArrayAdapter<CharSequence> sortAdapter =
                 ArrayAdapter.createFromResource(
@@ -54,6 +58,8 @@ public class FilterSettingsActivity extends AppCompatActivity {
             artCheckbox.setChecked(newsDeskValues.contains(artCheckbox.getText()));
             blogsCheckbox.setChecked(newsDeskValues.contains(blogsCheckbox.getText()));
             educationCheckbox.setChecked(newsDeskValues.contains(educationCheckbox.getText()));
+            fashionCheckbox.setChecked(newsDeskValues.contains(fashionCheckbox.getText()));
+            sportsCheckbox.setChecked(newsDeskValues.contains(sportsCheckbox.getText()));
         }
         int sortPosition = extras.getInt("sortType");
         sortSpinner.setSelection(sortPosition);
@@ -76,6 +82,12 @@ public class FilterSettingsActivity extends AppCompatActivity {
         }
         if (educationCheckbox.isChecked()) {
             newsDesk += "\"" + educationCheckbox.getText() + "\" ";
+        }
+        if (fashionCheckbox.isChecked()) {
+            newsDesk += "\"" + fashionCheckbox.getText() + "\" ";
+        }
+        if (sportsCheckbox.isChecked()) {
+            newsDesk += "\"" + sportsCheckbox.getText() + "\" ";
         }
 
         if (newsDesk.length() > 0) {

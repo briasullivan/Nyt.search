@@ -1,6 +1,9 @@
 package com.codepath.nytsearch;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +13,7 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.codepath.nytsearch.models.Article;
 import com.codepath.nytsearch.models.NewYorkTimesResponse;
@@ -54,7 +58,7 @@ public class SearchActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_search);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarMain);
         setSupportActionBar(toolbar);
         setupViews();
@@ -100,25 +104,10 @@ public class SearchActivity extends AppCompatActivity {
         return true;
     }
 
-    private void prepareQueryAndRequest(String query) {
-        if (query != null) {
-            curPage = 0;
-            curQuery = query;
-            int curSize = articleAdapter.getItemCount();
-            articles.clear();
-            articleAdapter.notifyItemRangeRemoved(0, curSize);
-            fetchArticles(query, 0);
-        }
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_filter) {
             Intent i = new Intent(this, FilterSettingsActivity.class);
 
@@ -134,6 +123,34 @@ public class SearchActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
+            String beginDateResult = data.getExtras().getString("beginDate");
+            int sortResult = data.getExtras().getInt("sortType");
+            String newsDeskResult = data.getExtras().getString("newsDeskValues");
+
+            filterByBeginDate = (beginDateResult != null);
+            beginDate = beginDateResult;
+            sortType = (sortResult == 0) ? SORT_TYPE_NEWEST : SORT_TYPE_OLDEST;
+            filterByNewsDeskValues = (newsDeskResult != null);
+            newsDeskQuery = newsDeskResult;
+
+            prepareQueryAndRequest(curQuery);
+        }
+    }
+
+    private void prepareQueryAndRequest(String query) {
+        if (query != null) {
+            curPage = 0;
+            curQuery = query;
+            int curSize = articleAdapter.getItemCount();
+            articles.clear();
+            articleAdapter.notifyItemRangeRemoved(0, curSize);
+            fetchArticles(query, 0);
+        }
     }
 
     public void fetchArticles(String query, int page) {
@@ -185,40 +202,45 @@ public class SearchActivity extends AppCompatActivity {
         } else {
             call = apiService.listArticles(query, page, sortType);
         }
-        call.enqueue(new Callback<NewYorkTimesResponse>() {
-            @Override
-            public void onResponse(Call<NewYorkTimesResponse> call, Response<NewYorkTimesResponse> response) {
-                NewYorkTimesResponse nytResponse = response.body();
-                if (nytResponse != null) {
-                    List<Article> newArticles = Article.fromDocList(nytResponse.getResponse().getDocs());
-                    int cursize = articles.size();
-                    articles.addAll(newArticles);
-                    articleAdapter.notifyItemRangeInserted(cursize, newArticles.size());
+
+        if (isNetworkAvailable() && isOnline()) {
+            call.enqueue(new Callback<NewYorkTimesResponse>() {
+                @Override
+                public void onResponse(Call<NewYorkTimesResponse> call, Response<NewYorkTimesResponse> response) {
+                    NewYorkTimesResponse nytResponse = response.body();
+                    if (nytResponse != null) {
+                        List<Article> newArticles = Article.fromDocList(nytResponse.getResponse().getDocs());
+                        int cursize = articles.size();
+                        articles.addAll(newArticles);
+                        articleAdapter.notifyItemRangeInserted(cursize, newArticles.size());
+                    }
                 }
 
-            }
-
-            @Override
-            public void onFailure(Call<NewYorkTimesResponse> call, Throwable t) {
-                t.printStackTrace();
-            }
-        });
+                @Override
+                public void onFailure(Call<NewYorkTimesResponse> call, Throwable t) {
+                    t.printStackTrace();
+                }
+            });
+        } else {
+            Toast.makeText(this, R.string.connection_error, Toast.LENGTH_LONG).show();
+        }
       }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
-            String beginDateResult = data.getExtras().getString("beginDate");
-            int sortResult = data.getExtras().getInt("sortType");
-            String newsDeskResult = data.getExtras().getString("newsDeskValues");
+    private Boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+    }
 
-            filterByBeginDate = (beginDateResult != null);
-            beginDate = beginDateResult;
-            sortType = (sortResult == 0) ? SORT_TYPE_NEWEST : SORT_TYPE_OLDEST;
-            filterByNewsDeskValues = (newsDeskResult != null);
-            newsDeskQuery = newsDeskResult;
-
-            prepareQueryAndRequest(curQuery);
-        }
+    public boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        } catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
+        return false;
     }
 }
