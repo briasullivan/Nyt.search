@@ -23,22 +23,37 @@ import java.util.List;
 /**
  * Created by briasullivan on 10/20/16.
  */
-public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHolder> {
+public class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    private static final int IMAGE = 0;
+    private static final int TEXT = 1;
+
+    public static class ImageViewHolder extends RecyclerView.ViewHolder {
         public TextView headline;
-        public TextView snippet;
         public TextView newsdesk;
         public DynamicHeightImageView thumbnail;
 
-        public ViewHolder(View itemView) {
+        public ImageViewHolder(View itemView) {
             super(itemView);
             headline = (TextView) itemView.findViewById(R.id.tvHeadline);
             thumbnail = (DynamicHeightImageView) itemView.findViewById(R.id.ivThumbnail);
-            snippet = (TextView) itemView.findViewById(R.id.tvSnippet);
             newsdesk = (TextView) itemView.findViewById(R.id.tvNewsDesk);
         }
     }
+
+    public static class TextViewHolder extends RecyclerView.ViewHolder {
+        public TextView headline;
+        public TextView snippet;
+        public TextView newsdesk;
+
+        public TextViewHolder(View itemView) {
+            super(itemView);
+            headline = (TextView) itemView.findViewById(R.id.tvHeadlineText);
+            snippet = (TextView) itemView.findViewById(R.id.tvSnippet);
+            newsdesk = (TextView) itemView.findViewById(R.id.tvNewsDeskText);
+        }
+    }
+
 
     private List<Article> articles;
     private Context context;
@@ -53,43 +68,82 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context c = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(c);
+        RecyclerView.ViewHolder viewHolder;
 
-        View articleView = inflater.inflate(R.layout.item_article, parent, false);
-        ViewHolder viewHolder = new ViewHolder(articleView);
-
+        switch (viewType) {
+            case IMAGE:
+                View imageArticleView = inflater.inflate(R.layout.item_article_image, parent, false);
+                viewHolder = new ImageViewHolder(imageArticleView);
+                break;
+            case TEXT:
+            default:
+                View textArticleView = inflater.inflate(R.layout.item_article_text, parent, false);
+                viewHolder = new TextViewHolder(textArticleView);
+                break;
+        }
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        final Article article = articles.get(position);
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        Article article = articles.get(position);
 
+        switch (holder.getItemViewType()) {
+            case IMAGE:
+                ImageViewHolder iHolder = (ImageViewHolder) holder;
+                configureImageViewHolder(iHolder, article);
+                break;
+            case TEXT:
+            default:
+                TextViewHolder tHolder = (TextViewHolder) holder;
+                configureTextViewHolder(tHolder, article);
+                break;
+        }
+    }
+
+    private void configureImageViewHolder(ImageViewHolder holder, Article article) {
         TextView tvHeadline = holder.headline;
-        TextView tvSnippet = holder.snippet;
         TextView tvNewsDesk = holder.newsdesk;
 
         String headline = article.getHeadline();
         tvHeadline.setText((headline != null) ? headline : "Headline");
-        tvNewsDesk.setText(article.getNewsDesk());
-
+        String newsDesk = article.getNewsDesk();
+        tvNewsDesk.setText(newsDesk);
+        if (newsDesk == null || newsDesk == "" || newsDesk.equals("None")) {
+            tvNewsDesk.setVisibility(View.GONE);
+        } else {
+            tvNewsDesk.setVisibility(View.VISIBLE);
+        }
         DynamicHeightImageView imageView = holder.thumbnail;
 
         String imageUrl = article.getThumbNail();
-        if (imageUrl != null) {
-            tvSnippet.setVisibility(View.GONE);
-            imageView.setVisibility(View.VISIBLE);
-            imageView.setHeightRatio(((double) article.getHeight()) / article.getWidth());
-            Picasso.with(context).load(imageUrl).placeholder(R.drawable.article_placeholder).into(imageView);
-        } else {
-            tvSnippet.setVisibility(View.VISIBLE);
-            tvSnippet.setText(article.getSnippet());
-            imageView.setVisibility(View.GONE);
-        }
+        imageView.setHeightRatio(((double) article.getHeight()) / article.getWidth());
+        Picasso.with(context).load(imageUrl).placeholder(R.drawable.article_placeholder).into(imageView);
+        holder.itemView.setOnClickListener(getArticleOnClickListener(article));
+    }
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+    private void configureTextViewHolder(TextViewHolder holder, Article article) {
+        TextView tvHeadline = holder.headline;
+        TextView tvSnippet = holder.snippet;
+        TextView tvNewsDesk = holder.newsdesk;
+
+        tvHeadline.setText(article.getHeadline());
+        tvSnippet.setText(article.getSnippet());
+        String newsDesk = article.getNewsDesk();
+        tvNewsDesk.setText(newsDesk);
+        if (newsDesk == null || newsDesk == "" || newsDesk.equals("None")) {
+            tvNewsDesk.setVisibility(View.GONE);
+        } else {
+            tvNewsDesk.setVisibility(View.VISIBLE);
+        }
+        holder.itemView.setOnClickListener(getArticleOnClickListener(article));
+    }
+
+    private View.OnClickListener getArticleOnClickListener(final Article article) {
+        return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
@@ -107,11 +161,19 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
                 CustomTabsIntent customTabsIntent = builder.build();
                 customTabsIntent.launchUrl((Activity)getContext(), Uri.parse(article.getWebUrl()));
             }
-        });
+        };
     }
 
     @Override
     public int getItemCount() {
         return articles.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (articles.get(position).getThumbNail() != null) {
+            return IMAGE;
+        }
+        return TEXT;
     }
 }

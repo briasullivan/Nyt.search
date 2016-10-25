@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/grid_item_round_corner"
     android:padding="10dp"
-    android:elevation="1dp"
+    android:elevation="2dp"
     android:clickable="true"
     android:focusable="true">
 
@@ -23,21 +23,16 @@
         android:id="@+id/tvHeadline"
         tools:text="Firefighters brace for another day of intense heat, winds"
         android:gravity="left"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title" />
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+        android:breakStrategy="high_quality" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/tvSnippet"
-        tools:text="Information about the headline/"
-        android:gravity="left"
-        android:visibility="gone"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Caption"
         android:text="Small Text"
-        android:id="@+id/tvNewsDesk" />
+        android:id="@+id/tvNewsDesk"
+        android:textColor="@color/abc_tint_switch_track"
+        android:textSize="12sp"
+        android:typeface="serif" />
 
 </LinearLayout>

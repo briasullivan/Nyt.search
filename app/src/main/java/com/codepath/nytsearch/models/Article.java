@@ -27,8 +27,10 @@ public class Article {
     }
 
     public String getSnippet() {
+
         return snippet;
     }
+
     public String getNewsDesk() {
         return newsDesk;
     }
@@ -52,6 +54,7 @@ public class Article {
     public Article(Doc doc) {
         this.webUrl = doc.getWeb_url();
         this.snippet = doc.getSnippet();
+        this.newsDesk = doc.getNews_desk();
         if (doc.getHeadline() != null) {
             this.headline = doc.getHeadline().getMain();
         }
@@ -67,7 +70,6 @@ public class Article {
             this.thumbNail = "https://www.nytimes.com/" + doc.getMultimedia().get(imagePosition).getUrl();
             this.height = doc.getMultimedia().get(imagePosition).getHeight();
             this.width = doc.getMultimedia().get(imagePosition).getWidth();
-            this.newsDesk = doc.getNews_desk();
         }
     }
 
